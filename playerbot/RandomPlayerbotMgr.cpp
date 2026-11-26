@@ -2804,6 +2804,11 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation>&
                     if (!member || member == bot)
                         continue;
 
+                    // A member in transfer is skipped: it can be without a map until it
+                    // lands, and resetting its movement needs one.
+                    if (!member->IsInWorld() || member->IsBeingTeleported())
+                        continue;
+
                     // RandomTeleport is only reached from ProcessBot, which runs on the world
                     // thread with every map worker parked, so members can be touched directly
                     // even when they are on another map.

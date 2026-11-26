@@ -296,9 +296,13 @@ void PlayerbotHolder::DisablePlayerBot(uint32 guid, bool logOutPlayer)
         if (logOutPlayer && bot->GetPlayerbotAI()->IsRealPlayer() && bot->GetGroup() && sPlayerbotAIConfig.IsFreeAltBot(guid))
             bot->GetSession()->SetOffline(); //Prevent groupkick
         bot->GetPlayerbotAI()->TellPlayer(bot->GetPlayerbotAI()->GetMaster(), BOT_TEXT("goodbye"));
-        bot->GetPlayerbotAI()->StopMoving();
-        MotionMaster& mm = *bot->GetMotionMaster();
-        mm.Clear();
+        // A bot in transfer can be without a map, and resetting its movement needs one.
+        if (bot->IsInWorld() && !bot->IsBeingTeleported())
+        {
+            bot->GetPlayerbotAI()->StopMoving();
+            MotionMaster& mm = *bot->GetMotionMaster();
+            mm.Clear();
+        }
 
         if (!sPlayerbotAIConfig.bExplicitDbStoreSave)
         {

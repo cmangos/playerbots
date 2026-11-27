@@ -79,6 +79,16 @@ namespace ai
         virtual uint32 GetItemId() override { return  0; }
     };
 
+    class UseQuestItemAction : public UseAction
+    {
+    public:
+        UseQuestItemAction(PlayerbotAI* ai, std::string name = "use quest item") : UseAction(ai, name) {}
+        virtual bool isUseful() override;
+
+    protected:
+        virtual bool Execute(Event& event) override;
+    };
+
     class UseSpellItemAction : public UseAction 
     {
     public:

@@ -367,6 +367,7 @@ namespace ai
 #endif
 
             creators["use id"] = [](PlayerbotAI* ai) { return new UseItemIdAction(ai); };
+            creators["use quest item"] = [](PlayerbotAI* ai) { return new UseQuestItemAction(ai); };
             creators["move to"] = [](PlayerbotAI* ai) { return new MoveToAction(ai); };
 
             // Dungeon Actions

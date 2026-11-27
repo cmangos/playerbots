@@ -270,6 +270,7 @@ namespace ai
             creators["rpg buy petition"] = [](PlayerbotAI* ai) { return new RpgBuyPetitionTrigger(ai); };
             creators["rpg use"] = [](PlayerbotAI* ai) { return new RpgUseTrigger(ai); };
             creators["rpg quest use"] = [](PlayerbotAI* ai) { return new RpgQuestUseTrigger(ai); };
+            creators["quest item ready"] = [](PlayerbotAI* ai) { return new QuestItemReadyTrigger(ai); };
             creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatTrigger(ai); };
             creators["rpg spell"] = [](PlayerbotAI* ai) { return new RpgSpellTrigger(ai); };
             creators["rpg spell click"] = [](PlayerbotAI* ai) { return new RpgSpellClickTrigger(ai); };

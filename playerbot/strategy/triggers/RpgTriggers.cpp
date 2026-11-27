@@ -619,6 +619,12 @@ bool RpgQuestUseTrigger::IsActive()
     return false;
 }
 
+bool QuestItemReadyTrigger::IsActive()
+{
+    Unit* target = nullptr;
+    return CanUseItemOn::GetScriptTargetUse(ai, target) != nullptr;
+}
+
 bool RpgAIChatTrigger::IsActive()
 {
     if (sPlayerbotAIConfig.llmEnabled == 0)

@@ -219,8 +219,17 @@ namespace ai
     public:
         CanUseItemOn(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can use item on"), Qualified() {}
         static bool IsQuestItemForEntry(PlayerbotAI* ai, uint32 itemId, int32 entry);
+        static std::list<Item*> GetQuestSourceItems(PlayerbotAI* ai);
         static bool HasQuestItemForEntry(PlayerbotAI* ai, int32 entry);
+        static float GetScriptTargetRadius(SpellEntry const* spellInfo, Map* map);
+        static Item* GetScriptTargetUse(PlayerbotAI* ai, Unit*& target);
         virtual bool Calculate() override;
+    };
+
+    class QuestItemUsedTargetsValue : public ManualSetValue<std::map<ObjectGuid, time_t>>
+    {
+    public:
+        QuestItemUsedTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::map<ObjectGuid, time_t>>(ai, {}, "quest item used targets") {}
     };
 
     // quest reward

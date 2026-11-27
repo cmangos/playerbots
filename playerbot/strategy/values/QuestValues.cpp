@@ -5,6 +5,11 @@
 #include "ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/strategy/deathknight/DKActions.h"
+#include "playerbot/ServerFacade.h"
+#include "Server/SQLStorages.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 using namespace ai;
 
@@ -427,9 +432,36 @@ bool CanUseItemOn::IsQuestItemForEntry(PlayerbotAI* ai, uint32 itemId, int32 ent
 	return false;
 }
 
+std::list<Item*> CanUseItemOn::GetQuestSourceItems(PlayerbotAI* ai)
+{
+	std::list<Item*> sourceItems;
+	std::set<uint32> itemIds;
+
+	for (auto& [questId, questStatusData] : ai->GetBot()->getQuestStatusMap())
+	{
+		if (questStatusData.m_status != QUEST_STATUS_INCOMPLETE)
+			continue;
+
+		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+
+		if (!quest || !quest->IsActive() || !quest->GetSrcItemId())
+			continue;
+
+		if (!itemIds.insert(quest->GetSrcItemId()).second)
+			continue;
+
+		Item* item = ai->GetBot()->GetItemByEntry(quest->GetSrcItemId());
+
+		if (item && ai->GetBot()->CanUseItem(item->GetProto()) == EQUIP_ERR_OK)
+			sourceItems.push_back(item);
+	}
+
+	return sourceItems;
+}
+
 bool CanUseItemOn::HasQuestItemForEntry(PlayerbotAI* ai, int32 entry)
 {
-	std::list<Item*> questItems = ai->GetAiObjectContext()->GetValue<std::list<Item*>>("inventory items", "quest")->Get();
+	std::list<Item*> questItems = GetQuestSourceItems(ai);
 
 	for (Item* item : questItems)
 	{
@@ -441,6 +473,135 @@ bool CanUseItemOn::HasQuestItemForEntry(PlayerbotAI* ai, int32 entry)
 	}
 
 	return false;
+}
+
+float CanUseItemOn::GetScriptTargetRadius(SpellEntry const* spellInfo, Map* map)
+{
+	float radius = spellInfo->EffectRadiusIndex[EFFECT_INDEX_0]
+		? GetSpellRadius(sSpellRadiusStore.LookupEntry(spellInfo->EffectRadiusIndex[EFFECT_INDEX_0]))
+		: GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
+
+	if (radius == 50000.f)
+		radius = 200.f;
+	else if (radius == 0.f)
+		radius = map->IsDungeon() ? DEFAULT_VISIBILITY_INSTANCE : DEFAULT_VISIBILITY_DISTANCE;
+
+	return radius;
+}
+
+Item* CanUseItemOn::GetScriptTargetUse(PlayerbotAI* ai, Unit*& target)
+{
+	target = nullptr;
+	Player* bot = ai->GetBot();
+
+	if (!bot->IsInWorld() || bot->IsBeingTeleported())
+		return nullptr;
+
+	std::list<Item*> questItems = GetQuestSourceItems(ai);
+
+	if (questItems.empty())
+		return nullptr;
+
+	std::map<ObjectGuid, time_t> usedTargets = ai->GetAiObjectContext()->GetValue<std::map<ObjectGuid, time_t>>("quest item used targets")->Get();
+	time_t now = time(nullptr);
+
+	for (Item* item : questItems)
+	{
+		if (!item)
+			continue;
+
+		ItemPrototype const* proto = item->GetProto();
+		uint32 spellId = proto->Spells[0].SpellId;
+
+		if (!spellId)
+			continue;
+
+#ifdef MANGOSBOT_ZERO
+		if (proto->Spells[0].SpellTrigger != ITEM_SPELLTRIGGER_ON_USE && proto->Spells[0].SpellTrigger != ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
+#else
+		if (proto->Spells[0].SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+#endif
+			continue;
+
+		SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(spellId);
+
+		if (!spellInfo || spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0] != TARGET_UNIT_SCRIPT_NEAR_CASTER)
+			continue;
+
+		if (!sServerFacade.IsSpellReady(bot, spellId) || !sServerFacade.IsSpellReady(bot, spellId, proto->ItemId))
+			continue;
+
+		SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(spellId);
+
+		std::vector<uint32> neededEntries;
+
+		for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> scriptTarget = bounds.first; scriptTarget != bounds.second; ++scriptTarget)
+		{
+			if (scriptTarget->type != SPELL_TARGET_TYPE_CREATURE || scriptTarget->CanNotHitWithSpellEffect(EFFECT_INDEX_0))
+				continue;
+
+			if (IsQuestItemForEntry(ai, proto->ItemId, (int32)scriptTarget->targetEntry))
+				neededEntries.push_back(scriptTarget->targetEntry);
+		}
+
+		if (neededEntries.empty())
+			continue;
+
+		if (spellInfo->RequiresSpellFocus)
+		{
+			GameObject* focus = nullptr;
+			MaNGOS::GameObjectFocusCheck focusCheck(bot, spellInfo->RequiresSpellFocus);
+			MaNGOS::GameObjectSearcher<MaNGOS::GameObjectFocusCheck> focusSearcher(focus, focusCheck);
+			Cell::VisitGridObjects(bot, focusSearcher, bot->GetMap()->GetVisibilityDistance());
+
+			if (!focus)
+				continue;
+		}
+
+		float radius = GetScriptTargetRadius(spellInfo, bot->GetMap());
+		float castRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
+
+		if (castRange > 0.f && castRange < 50000.f && castRange < radius)
+			radius = castRange;
+
+		Unit* best = nullptr;
+		float bestDistance = radius;
+
+		for (uint32 entry : neededEntries)
+		{
+			std::list<Unit*> units;
+			MaNGOS::AllCreaturesOfEntryInRangeCheck unitCheck(bot, entry, radius);
+			MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> unitSearcher(units, unitCheck);
+			Cell::VisitAllObjects(bot, unitSearcher, radius);
+
+			for (Unit* unit : units)
+			{
+				if (!unit || unit->GetTypeId() != TYPEID_UNIT || !unit->IsAlive() || !unit->IsInWorld())
+					continue;
+
+				auto used = usedTargets.find(unit->GetObjectGuid());
+
+				if (used != usedTargets.end() && used->second > now)
+					continue;
+
+				float distance = bot->GetDistance(unit);
+
+				if (distance <= bestDistance)
+				{
+					best = unit;
+					bestDistance = distance;
+				}
+			}
+		}
+
+		if (best)
+		{
+			target = best;
+			return item;
+		}
+	}
+
+	return nullptr;
 }
 
 bool NeedQuestObjectiveValue::HasIncompleteObjective(PlayerbotAI* ai)

@@ -193,6 +193,13 @@ namespace ai
         virtual bool IsActive() override;
     };
 
+    class QuestItemReadyTrigger : public Trigger
+    {
+    public:
+        QuestItemReadyTrigger(PlayerbotAI* ai, std::string name = "quest item ready") : Trigger(ai, name, 2) {}
+        virtual bool IsActive() override;
+    };
+
     class RpgAIChatTrigger : public RpgTrigger
     {
     public:

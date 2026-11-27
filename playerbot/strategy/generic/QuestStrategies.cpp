@@ -14,6 +14,8 @@ void QuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     PassTroughStrategy::InitNonCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode("quest share", NextAction::array(0, new NextAction("accept quest share", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode("quest item ready", NextAction::array(0, new NextAction("use quest item", 7.0f), NULL)));
 };
 
 void DefaultQuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

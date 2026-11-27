@@ -11,6 +11,7 @@
 #include "TellLosAction.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/ItemCountValue.h"
+#include "playerbot/strategy/values/QuestValues.h"
 #include "playerbot/TravelMgr.h"
 
 using namespace ai;
@@ -629,6 +630,14 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             }
         }
         
+        if (!validTarget && unit && spellInfo->EffectImplicitTargetA[0] == TARGET_UNIT_SCRIPT_NEAR_CASTER &&
+            bot->IsWithinDistInMap(unit, GetSpellMaxRange(sServerFacade.LookupSpellRangeEntry(spellInfo->rangeIndex))))
+        {
+            unitTarget = unit;
+            targets.setUnitTarget(unit);
+            validTarget = true;
+        }
+
         if (!validTarget)
         {
             targets.setUnitTarget(bot);
@@ -691,7 +700,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
 
             if (successCast)
             {
-                if (itemUsed == nullptr && ai->HasCheat(BotCheatMask::item))
+                if (itemUsed == nullptr && ai->HasCheat(BotCheatMask::item) && spell->GetCastTime() == 0)
                 {
                     if (!HasItemCooldown(itemId))
                     {
@@ -1006,6 +1015,47 @@ bool UseAction::OpenItem(Player* requester, Item* item)
         return true;
 }
 
+
+bool UseQuestItemAction::isUseful()
+{
+    return !bot->IsInCombat() && !bot->IsTaxiFlying();
+}
+
+bool UseQuestItemAction::Execute(Event& event)
+{
+    Unit* target = nullptr;
+    Item* item = CanUseItemOn::GetScriptTargetUse(ai, target);
+
+    if (!item || !target)
+        return false;
+
+    Value<std::map<ObjectGuid, time_t>>* usedValue = context->GetValue<std::map<ObjectGuid, time_t>>("quest item used targets");
+    std::map<ObjectGuid, time_t> usedTargets = usedValue->Get();
+    time_t now = time(nullptr);
+
+    for (auto used = usedTargets.begin(); used != usedTargets.end();)
+    {
+        if (used->second <= now)
+            used = usedTargets.erase(used);
+        else
+            ++used;
+    }
+
+    usedTargets[target->GetObjectGuid()] = now + 20;
+    usedValue->Set(usedTargets);
+
+    if (bot->IsMoving())
+        ai->StopMoving();
+
+    if (bot->IsMounted())
+        ai->Unmount();
+
+    if (!UseItem(nullptr, item->GetProto()->ItemId, target))
+        return false;
+
+    SetDuration(GetDuration() + 2000);
+    return true;
+}
 
 bool UseAction::HasItemCooldown(uint32 itemId) const
 {

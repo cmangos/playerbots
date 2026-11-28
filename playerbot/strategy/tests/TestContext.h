@@ -5,12 +5,14 @@
 #include <set>
 #include <map>
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include "Globals/ObjectMgr.h"
 #include "playerbot/GuidPosition.h"
 #include "playerbot/WorldPosition.h"
 
 class ObjectGuid;
+struct BotCreateResult;
 
 namespace ai
 {
@@ -43,6 +45,7 @@ namespace ai
         bool focusMobKilled;                    
         bool focusMobPassive;                   
         std::vector<ObjectGuid> spawnedBots;    
+        std::shared_ptr<BotCreateResult> spawnRequest;
         std::vector<std::string> monitors;      
         std::vector<std::string> deferredCleanups;
         size_t cleanupPc;

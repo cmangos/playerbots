@@ -15,7 +15,7 @@ TestResult CleanupParty::Execute(const std::string& params, Player* bot,
         if (guid.IsPlayer())
         {
             if (ai->GetHolder())
-                ai->GetHolder()->DeleteBot(guid, false);
+                ai->GetHolder()->DeleteBotDeferred(guid, false);
         }
         else if (Creature* creature = ai->GetCreature(guid))
         {

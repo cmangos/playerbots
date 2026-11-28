@@ -4,6 +4,9 @@
 #include "Talentspec.h"
 #include "Globals/SharedDefines.h"
 #include "SystemConfig.h"
+#include <atomic>
+#include <memory>
+#include <set>
 
 class Player;
 class PlayerbotMgr;
@@ -108,6 +111,7 @@ public:
     bool IsInRandomAccountList(uint32 id);
     bool IsFreeAltBot(uint32 guid);
     bool IsFreeAltBot(Player* player) {return IsFreeAltBot(player->GetGUIDLow());}
+    void RebuildFreeAltBotGuids();
     bool IsInRandomQuestItemList(uint32 id);
 	bool IsInPvpProhibitedZone(uint32 id);
 
@@ -138,6 +142,7 @@ public:
     std::list<uint32> randomBotQuestIds;
     std::list<uint32> immuneSpellIds;
     std::list<std::pair<uint32, uint32>> freeAltBots;
+    std::atomic<std::shared_ptr<const std::set<uint32>>> freeAltBotGuids = std::make_shared<const std::set<uint32>>();
     std::list<std::string> toggleAlwaysOnlineAccounts;
     std::list<std::string> toggleAlwaysOnlineChars;
     bool enableRandomTeleports;

@@ -483,6 +483,7 @@ void TestAction::ReportResult()
 
         if (ai->GetHolder())
             ai->GetHolder()->DeleteBot(bot->GetObjectGuid(), false);        
+            ai->GetHolder()->DeleteBotDeferred(bot->GetObjectGuid(), false);        
     }
 }
 

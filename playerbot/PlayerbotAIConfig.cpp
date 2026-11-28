@@ -855,11 +855,17 @@ bool PlayerbotAIConfig::IsInRandomAccountList(uint32 id)
 
 bool PlayerbotAIConfig::IsFreeAltBot(uint32 guid)
 {
-    for (auto bot : freeAltBots)
-        if (bot.second == guid)
-            return true;
+    std::shared_ptr<const std::set<uint32>> guids = freeAltBotGuids.load(std::memory_order_acquire);
+    return guids->find(guid) != guids->end();
+}
 
-    return false;
+void PlayerbotAIConfig::RebuildFreeAltBotGuids()
+{
+    std::set<uint32> guids;
+    for (const auto& bot : freeAltBots)
+        guids.insert(bot.second);
+
+    freeAltBotGuids.store(std::make_shared<const std::set<uint32>>(std::move(guids)), std::memory_order_release);
 }
 
 bool PlayerbotAIConfig::IsPartyBotBannedStrategy(const std::string& name)
@@ -1042,6 +1048,8 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
 
         } while (results->NextRow());
     }
+
+    RebuildFreeAltBotGuids();
 }
 
 std::string PlayerbotAIConfig::GetTimestampStr()

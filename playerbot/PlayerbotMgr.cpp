@@ -1333,6 +1333,7 @@ std::string PlayerbotHolder::HandleBotAlways(Player* bot, Player* master, const 
     {
         sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::ACTIVE);
         sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, guid.GetCounter()));
+        sPlayerbotAIConfig.RebuildFreeAltBotGuids();
 
         Player* existingBot = sRandomPlayerbotMgr.GetPlayerBot(guid);
         if (existingBot)
@@ -1373,6 +1374,7 @@ std::string PlayerbotHolder::HandleBotAlways(Player* bot, Player* master, const 
 
         auto it = std::remove_if(sPlayerbotAIConfig.freeAltBots.begin(), sPlayerbotAIConfig.freeAltBots.end(), [guid](std::pair<uint32, uint32> i) { return i.second == guid.GetCounter(); });
         sPlayerbotAIConfig.freeAltBots.erase(it, sPlayerbotAIConfig.freeAltBots.end());
+        sPlayerbotAIConfig.RebuildFreeAltBotGuids();
 
         return "Disabled offline player ai for " + alwaysName;
     }
@@ -2178,6 +2180,7 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             else
             {
                 sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, botGuid));
+                sPlayerbotAIConfig.RebuildFreeAltBotGuids();
                 messages.push_back("Bot is now online");
             }
         }
@@ -2740,6 +2743,54 @@ bool PlayerbotHolder::DeleteBot(ObjectGuid guid, bool allowInstant)
     OnBotDeleted(guid, botAccount);
 
     return true;
+}
+
+void PlayerbotHolder::CreateBotDeferred(uint32 masterGuidLow, const std::string& param, std::shared_ptr<BotCreateResult> result)
+{
+    if (!result)
+        return;
+
+    PlayerbotHolder* holder = this;
+    sWorld.GetMessager().AddMessage([holder, masterGuidLow, param, result](World* /*world*/)
+    {
+        if (!result->cancelled.load(std::memory_order_acquire))
+        {
+            Player* master = masterGuidLow ? sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, masterGuidLow)) : nullptr;
+            holder->CreateBot(master, param, result->messages, result->guid);
+        }
+
+        result->done.store(true, std::memory_order_release);
+    });
+}
+
+void PlayerbotHolder::HandleGroupDeferred(uint32 masterGuidLow, const std::string& param, std::shared_ptr<BotCreateResult> result)
+{
+    if (!result)
+        return;
+
+    PlayerbotHolder* holder = this;
+    sWorld.GetMessager().AddMessage([holder, masterGuidLow, param, result](World* /*world*/)
+    {
+        if (!result->cancelled.load(std::memory_order_acquire))
+        {
+            Player* master = masterGuidLow ? sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, masterGuidLow)) : nullptr;
+            result->messages = holder->HandleGroup(master, param, SEC_PLAYER);
+        }
+
+        result->done.store(true, std::memory_order_release);
+    });
+}
+
+void PlayerbotHolder::DeleteBotDeferred(ObjectGuid guid, bool allowInstant)
+{
+    if (!guid)
+        return;
+
+    PlayerbotHolder* holder = this;
+    sWorld.GetMessager().AddMessage([holder, guid, allowInstant](World* /*world*/)
+    {
+        holder->DeleteBot(guid, allowInstant);
+    });
 }
 
 std::string PlayerbotHolder::HandleBotDelete(Player* bot, Player* master, const std::string param)

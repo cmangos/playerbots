@@ -6,6 +6,8 @@
 #include "Entities/ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
 #include "Globals/SharedDefines.h"
+#include <atomic>
+#include <memory>
 
 
 class WorldPacket;
@@ -16,6 +18,14 @@ class Item;
 
 typedef std::map<uint32, Player*> PlayerBotMap;
 typedef std::map<std::string, std::set<std::string> > PlayerBotErrorMap;
+
+struct BotCreateResult
+{
+    std::atomic<bool> done{ false };
+    std::atomic<bool> cancelled{ false };
+    ObjectGuid guid;
+    std::list<std::string> messages;
+};
 
 class PlayerbotHolder : public PlayerbotAIBase
 {
@@ -51,7 +61,10 @@ public:
     static std::unordered_map<std::string, std::string> GetCommandTexts();
 
     void CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid);
+    void CreateBotDeferred(uint32 masterGuidLow, const std::string& param, std::shared_ptr<BotCreateResult> result);
+    void HandleGroupDeferred(uint32 masterGuidLow, const std::string& param, std::shared_ptr<BotCreateResult> result);
     bool DeleteBot(ObjectGuid guid, bool allowInstant = true);
+    void DeleteBotDeferred(ObjectGuid guid, bool allowInstant = true);
 #ifdef GenerateBotTests
     void DepositTestResult(const std::string& testName, const std::string& result);
 #endif

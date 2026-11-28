@@ -16,17 +16,34 @@ TestResult CommandPartySpawnBot::Execute(const std::string& params, Player* bot,
         message = "Failed to spawn bot with params: " + params;
         return TestResult::IMPOSSIBLE;
     }
-    std::list<std::string> messages;
-    ObjectGuid guid;
-    ai->GetHolder()->CreateBot(bot, params + " temporary=true", messages, guid);
 
-    if (!guid)
+    if (!ctx.spawnRequest)
+    {
+        ctx.spawnRequest = std::make_shared<BotCreateResult>();
+        ai->GetHolder()->CreateBotDeferred(bot->GetGUIDLow(), params + " temporary=true", ctx.spawnRequest);
+        message = "Waiting for bot creation";
+        return TestResult::PENDING;
+    }
+
+    if (!ctx.spawnRequest->done.load(std::memory_order_acquire))
+    {
+        message = "Waiting for bot creation";
+        return TestResult::PENDING;
+    }
+
+    std::shared_ptr<BotCreateResult> request = ctx.spawnRequest;
+    ctx.spawnRequest.reset();
+
+    if (!request->guid)
     {
         message = "Failed to spawn bot with params: " + params;
+        for (const auto& line : request->messages)
+            message += " (" + line + ")";
+
         return TestResult::IMPOSSIBLE;
     }
 
-    ctx.spawnedBots.push_back(guid);
+    ctx.spawnedBots.push_back(request->guid);
 
     return TestResult::PASS;
 }
@@ -42,7 +59,7 @@ TestResult CommandPartyDespawnBot::Execute(const std::string& params, Player* bo
 
     for (auto& guid : ctx.spawnedBots)
     {
-        ai->GetHolder()->DeleteBot(guid);
+        ai->GetHolder()->DeleteBotDeferred(guid);
     }
     ctx.spawnedBots.clear();
     return TestResult::PASS;
@@ -105,7 +122,31 @@ TestResult CommandPartyForm::Execute(const std::string& params, Player* bot,
 TestResult CommandPartySpawnGroup::Execute(const std::string& params, Player* bot,
                     PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
-    sRandomPlayerbotMgr.HandleGroup(bot, params + " temporary=true", SEC_PLAYER);
+    if (!ai->GetHolder())
+    {
+        message = "Failed to create group with params: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    if (!ctx.spawnRequest)
+    {
+        ctx.spawnRequest = std::make_shared<BotCreateResult>();
+        ai->GetHolder()->HandleGroupDeferred(bot->GetGUIDLow(), params + " temporary=true", ctx.spawnRequest);
+        message = "Waiting for group creation";
+        return TestResult::PENDING;
+    }
+
+    if (!ctx.spawnRequest->done.load(std::memory_order_acquire))
+    {
+        message = "Waiting for group creation";
+        return TestResult::PENDING;
+    }
+
+    std::shared_ptr<BotCreateResult> request = ctx.spawnRequest;
+    ctx.spawnRequest.reset();
+
+    for (const auto& line : request->messages)
+        message += (message.empty() ? "" : "; ") + line;
 
     return TestResult::PASS;
 }

@@ -34,16 +34,22 @@ void TestContext::Reset()
     {
         if (guid && guid.IsPlayer())
         {
-            sRandomPlayerbotMgr.DeleteBot(guid, true);
+            sRandomPlayerbotMgr.DeleteBotDeferred(guid, true);
         }
     }
     spawnedBots.clear();
+
+    if (spawnRequest)
+        spawnRequest->cancelled.store(true, std::memory_order_release);
+
+    spawnRequest.reset();
     deliveredGroupMembers.clear();
     groupOnMapExpected = 0;
     lootStackSeen = false;
     actionSpamArmed = false;
     transportRideMs.clear();
     transportRideTick = 0;
+    transportRideCredited = 0;
     transportRideOnLastTick = false;
     transportRideLastPos = WorldPosition();
     transportRideLastAtStop = false;

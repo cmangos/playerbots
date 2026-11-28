@@ -882,9 +882,15 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
         for (auto bot : availableBots)
         {
             if (GetPlayerBot(bot))
-                continue;   
+                continue;
 
-            if (!eventCache[bot].empty() && GetEventValue(bot, "login"))
+            bool hasCachedEvents;
+            {
+                std::lock_guard<std::mutex> guard(eventCacheLock);
+                hasCachedEvents = !eventCache[bot].empty();
+            }
+
+            if (hasCachedEvents && GetEventValue(bot, "login"))
             {
                 onlineBotCount++;
                 continue;
@@ -1192,6 +1198,9 @@ void RandomPlayerbotMgr::LoginFreeBots()
         sPlayerbotAIConfig.freeAltBots.remove_if([&](const std::pair<uint32, uint32>& entry) {
             return std::find(botsToRemove.begin(), botsToRemove.end(), entry) != botsToRemove.end();
         });
+
+        if (!botsToRemove.empty())
+            sPlayerbotAIConfig.RebuildFreeAltBotGuids();
     }
 }
 
@@ -3442,25 +3451,45 @@ std::list<uint32> RandomPlayerbotMgr::GetBgBots(uint32 bracket)
 uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, std::string event)
 {
     // load all events at once on first event load
-    if (eventCache[bot].empty())
+    bool needLoad;
     {
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        needLoad = eventCache[bot].empty();
+    }
+
+    if (needLoad)
+    {
+        std::map<std::string, CachedEvent> loaded;
+
         auto results = CharacterDatabase.PQuery("SELECT `event`, `value`, `time`, validIn, `data` FROM ai_playerbot_random_bots WHERE owner = 0 AND bot = '%u'", bot);
         if (results)
         {
             do
             {
                 Field* fields = results->Fetch();
-                std::string eventName = fields[0].GetString();
-                CachedEvent e;
-                e.value = fields[1].GetUInt32();
-                e.lastChangeTime = fields[2].GetUInt32();
-                e.validIn = fields[3].GetUInt32();
-                e.data = fields[4].GetString();
-                eventCache[bot][eventName] = e;
+                CachedEvent row;
+                row.value = fields[1].GetUInt32();
+                row.lastChangeTime = fields[2].GetUInt32();
+                row.validIn = fields[3].GetUInt32();
+                row.data = fields[4].GetString();
+                loaded[fields[0].GetString()] = row;
             } while (results->NextRow());
         }
+
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        for (const auto& row : loaded)
+        {
+            auto& botEvents = eventCache[bot];
+            if (botEvents.find(row.first) == botEvents.end())
+                botEvents[row.first] = row.second;
+        }
     }
-    CachedEvent e = eventCache[bot][event];
+
+    CachedEvent e;
+    {
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        e = eventCache[bot][event];
+    }
 
     if ((time(0) - e.lastChangeTime) >= e.validIn && event != "specNo" && event != "specLink" && event != "init" && event != "current_time" && event != "always" && event != "selfbot")
         e.value = 0;
@@ -3470,26 +3499,37 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, std::string event)
 
 int32 RandomPlayerbotMgr::GetValueValidTime(uint32 bot, std::string event)
 {
-    if (eventCache.find(bot) == eventCache.end())
+    std::lock_guard<std::mutex> guard(eventCacheLock);
+
+    auto botEvents = eventCache.find(bot);
+    if (botEvents == eventCache.end())
         return 0;
 
-    if (eventCache[bot].find(event) == eventCache[bot].end())
+    auto entry = botEvents->second.find(event);
+    if (entry == botEvents->second.end())
         return 0;
 
-    CachedEvent e = eventCache[bot][event];
+    CachedEvent e = entry->second;
 
     return e.validIn-(time(0) - e.lastChangeTime);
 }
 
 std::string RandomPlayerbotMgr::GetEventData(uint32 bot, std::string event)
 {
-    std::string data = "";
-    if (GetEventValue(bot, event))
-    {
-        CachedEvent e = eventCache[bot][event];
-        data = e.data;
-    }
-    return data;
+    if (!GetEventValue(bot, event))
+        return "";
+
+    std::lock_guard<std::mutex> guard(eventCacheLock);
+
+    auto botEvents = eventCache.find(bot);
+    if (botEvents == eventCache.end())
+        return "";
+
+    auto entry = botEvents->second.find(event);
+    if (entry == botEvents->second.end())
+        return "";
+
+    return entry->second.data;
 }
 
 uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, std::string event, uint32 value, uint32 validIn, std::string data)
@@ -3513,7 +3553,10 @@ uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, std::string event, uint32 v
     }
 
     CachedEvent e(value, (uint32)time(0), validIn, data);
-    eventCache[bot][event] = e;
+    {
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        eventCache[bot][event] = e;
+    }
     return value;
 }
 
@@ -4746,7 +4789,10 @@ void RandomPlayerbotMgr::Remove(Player* bot)
 {
     uint32 owner = bot->GetGUIDLow();
     CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE owner = 0 AND bot = '%d'", owner);
-    eventCache[owner].clear();
+    {
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        eventCache[owner].clear();
+    }
 
     LogoutPlayerBot(owner);
 }
@@ -5156,7 +5202,10 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleReset(std::string param)
 {
     std::list<std::string> messages;
     CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where event not in ('temporary')");
-    sRandomPlayerbotMgr.eventCache.clear();
+    {
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        eventCache.clear();
+    }
     std::string msg = "Random bots were reset for all players. Please restart the Server.";
     messages.push_back(msg);
     return messages;
@@ -5530,7 +5579,12 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleMem(std::string param)
 
     uint32 eventBots = 0;
     uint32 events = 0;
-    for (auto& botEvents : eventCache)
+    std::map<uint32, std::map<std::string, CachedEvent> > eventCacheSnapshot;
+    {
+        std::lock_guard<std::mutex> guard(eventCacheLock);
+        eventCacheSnapshot = eventCache;
+    }
+    for (auto& botEvents : eventCacheSnapshot)
     {
         ++eventBots;
         events += botEvents.second.size();

@@ -8,6 +8,7 @@
 #include "WorldPosition.h"
 #include <map>
 #include <list>
+#include <mutex>
 
 class WorldPacket;
 class Player;
@@ -280,6 +281,7 @@ public:
         std::map<uint32, std::map<uint32, std::vector<std::pair<ObjectGuid, WorldLocation>> > > innCacheLevel;
         std::map<Team, std::map<BattleGroundTypeId, std::list<uint32> > > BattleMastersCache;
         std::map<uint32, std::map<std::string, CachedEvent> > eventCache;
+        std::mutex eventCacheLock;
         BarGoLink* loginProgressBar;
         std::list<uint32> currentBots;
         std::list<uint32> arenaTeamMembers;

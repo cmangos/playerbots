@@ -197,11 +197,27 @@ namespace ai
 
     //---------------------------------------------------------------------------------------------------------------------
 
+    // How much healing a spell gives per mana. The higher the better. Values are compared as numbers.
+    enum class HealingManaEfficiency : uint8
+    {
+        VERY_LOW = 1,
+        LOW = 2,
+        MEDIUM = 4,
+        HIGH = 8,
+        VERY_HIGH = 16,
+        SUPERIOR = 32
+    };
+
     class CastHealingSpellAction : public CastAuraSpellAction
     {
     public:
-        CastHealingSpellAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f) : CastAuraSpellAction(ai, spell, true), estAmount(estAmount) {}
-        
+        CastHealingSpellAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f, HealingManaEfficiency manaEfficiency = HealingManaEfficiency::MEDIUM)
+            : CastAuraSpellAction(ai, spell, true), manaEfficiency(manaEfficiency), estAmount(estAmount) {}
+
+        // Read by the save mana strategy. estAmount is the percent of a target's health the spell restores.
+        HealingManaEfficiency manaEfficiency;
+        uint8 estAmount;
+
     protected:
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_AOE; }
         virtual std::string GetTargetName() override { return "self target"; }
@@ -214,15 +230,12 @@ namespace ai
                 return false;
             return CastAuraSpellAction::isUseful();
         }
-
-    protected:
-        uint8 estAmount;
     };
 
     class CastAoeHealSpellAction : public CastHealingSpellAction
     {
     public:
-    	CastAoeHealSpellAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount) {}
+    	CastAoeHealSpellAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f, HealingManaEfficiency manaEfficiency = HealingManaEfficiency::MEDIUM) : CastHealingSpellAction(ai, spell, estAmount, manaEfficiency) {}
 		virtual std::string GetTargetName() override { return "party member to heal"; }
         virtual bool isUseful() override;
     };
@@ -247,7 +260,7 @@ namespace ai
     class HealPartyMemberAction : public CastHealingSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        HealPartyMemberAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount), PartyMemberActionNameSupport(spell) {}
+        HealPartyMemberAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f, HealingManaEfficiency manaEfficiency = HealingManaEfficiency::MEDIUM) : CastHealingSpellAction(ai, spell, estAmount, manaEfficiency), PartyMemberActionNameSupport(spell) {}
         virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
 		virtual std::string GetTargetName() override { return "party member to heal"; }
     };
@@ -255,7 +268,7 @@ namespace ai
     class HealHotPartyMemberAction : public HealPartyMemberAction
     {
     public:
-        HealHotPartyMemberAction(PlayerbotAI* ai, std::string spell) : HealPartyMemberAction(ai, spell) {}
+        HealHotPartyMemberAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f, HealingManaEfficiency manaEfficiency = HealingManaEfficiency::MEDIUM) : HealPartyMemberAction(ai, spell, estAmount, manaEfficiency) {}
         virtual bool isUseful() override;
     };
 

@@ -16,6 +16,7 @@
 #include "generic/StayStrategy.h"
 #include "generic/UseFoodStrategy.h"
 #include "generic/ConserveManaStrategy.h"
+#include "generic/SaveManaStrategy.h"
 #include "generic/EmoteStrategy.h"
 #include "generic/TankAssistStrategy.h"
 #include "generic/DpsAssistStrategy.h"
@@ -74,6 +75,7 @@ namespace ai
             creators["emote"] = [](PlayerbotAI* ai) { return new EmoteStrategy(ai); };
             creators["passive"] = [](PlayerbotAI* ai) { return new PassiveStrategy(ai); };
             creators["conserve mana"] = [](PlayerbotAI* ai) { return new ConserveManaStrategy(ai); };
+            creators["save mana"] = [](PlayerbotAI* ai) { return new SaveManaStrategy(ai); };
             creators["food"] = [](PlayerbotAI* ai) { return new UseFoodStrategy(ai); };
             creators["consumables"] = [](PlayerbotAI* ai) { return new ConsumableStrategy(ai); };
             creators["chat"] = [](PlayerbotAI* ai) { return new ChatCommandHandlerStrategy(ai); };

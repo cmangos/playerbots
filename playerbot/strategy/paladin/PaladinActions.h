@@ -477,25 +477,25 @@ namespace ai
     class CastHolyLightAction : public CastHealingSpellAction
     {
     public:
-        CastHolyLightAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "holy light") {}
+        CastHolyLightAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "holy light", 50, HealingManaEfficiency::MEDIUM) {}
     };
 
     class CastHolyLightOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastHolyLightOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "holy light") {}
+        CastHolyLightOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "holy light", 50, HealingManaEfficiency::MEDIUM) {}
     };
 
     class CastFlashOfLightAction : public CastHealingSpellAction
     {
     public:
-        CastFlashOfLightAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "flash of light") {}
+        CastFlashOfLightAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "flash of light", 20, HealingManaEfficiency::HIGH) {}
     };
 
     class CastFlashOfLightOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastFlashOfLightOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "flash of light") {}
+        CastFlashOfLightOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "flash of light", 20, HealingManaEfficiency::HIGH) {}
     };
 
     class CastLayOnHandsAction : public CastHealingSpellAction

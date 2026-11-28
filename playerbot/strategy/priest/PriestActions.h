@@ -29,16 +29,16 @@ namespace ai
     PROTECT_ACTION(CastPainSuppressionProtectAction, "pain suppression");
 
     // holy
-    HEAL_ACTION(CastLesserHealAction, "lesser heal");
-    HEAL_PARTY_ACTION(CastLesserHealOnPartyAction, "lesser heal");
-    HEAL_ACTION(CastHealAction, "heal");
-    HEAL_PARTY_ACTION(CastHealOnPartyAction, "heal");
-    HEAL_ACTION(CastGreaterHealAction, "greater heal");
-    HEAL_PARTY_ACTION(CastGreaterHealOnPartyAction, "greater heal");
-    HEAL_ACTION(CastFlashHealAction, "flash heal");
-    HEAL_PARTY_ACTION(CastFlashHealOnPartyAction, "flash heal");
-    HEAL_ACTION(CastRenewAction, "renew");
-    HEAL_HOT_PARTY_ACTION(CastRenewOnPartyAction, "renew");
+    HEAL_ACTION_E(CastLesserHealAction, "lesser heal", 20, HealingManaEfficiency::HIGH);
+    HEAL_PARTY_ACTION_E(CastLesserHealOnPartyAction, "lesser heal", 20, HealingManaEfficiency::HIGH);
+    HEAL_ACTION_E(CastHealAction, "heal", 40, HealingManaEfficiency::MEDIUM);
+    HEAL_PARTY_ACTION_E(CastHealOnPartyAction, "heal", 40, HealingManaEfficiency::MEDIUM);
+    HEAL_ACTION_E(CastGreaterHealAction, "greater heal", 55, HealingManaEfficiency::MEDIUM);
+    HEAL_PARTY_ACTION_E(CastGreaterHealOnPartyAction, "greater heal", 55, HealingManaEfficiency::MEDIUM);
+    HEAL_ACTION_E(CastFlashHealAction, "flash heal", 30, HealingManaEfficiency::LOW);
+    HEAL_PARTY_ACTION_E(CastFlashHealOnPartyAction, "flash heal", 30, HealingManaEfficiency::LOW);
+    HEAL_ACTION_E(CastRenewAction, "renew", 15, HealingManaEfficiency::VERY_HIGH);
+    HEAL_HOT_PARTY_ACTION_E(CastRenewOnPartyAction, "renew", 15, HealingManaEfficiency::VERY_HIGH);
     // holy 2.4.3
     HEAL_PARTY_ACTION(CastPrayerOfMendingAction, "prayer of mending");
     HEAL_PARTY_ACTION(CastBindingHealAction, "binding heal");

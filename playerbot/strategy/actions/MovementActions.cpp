@@ -37,6 +37,19 @@ namespace
         return position && stop && position.getMapId() == stop.getMapId() && position.distance(stop) < tolerance;
     }
 
+    void RideClockTick(TransportRide& ride)
+    {
+        const uint32 now = WorldTimer::getMSTime();
+
+        if (ride.tickMs)
+        {
+            uint32 delta = WorldTimer::getMSTimeDiff(ride.tickMs, now);
+            ride.riddenMs += delta > 30000 ? 30000 : delta;
+        }
+
+        ride.tickMs = now ? now : 1;
+    }
+
     std::string TransportDiag(PlayerbotAI* ai, uint32 entry, const WorldPosition& dock, const char* caller)
     {
         std::ostringstream out;
@@ -69,18 +82,7 @@ namespace
         if (!transport)
             return WorldPosition();
 
-        if (dynamic_cast<Transport*>(transport))
-            return WorldPosition(transport);
-
-#if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        Position state;
-        uint32 progress = 0;
-        transport->GetCurrentPathState(state, progress);
-
-        return WorldPosition(transport->GetMapId(), state.x, state.y, state.z);
-#else
         return WorldPosition(transport);
-#endif
     }
 
     bool TransportDockedAt(GenericTransport* transport, const WorldPosition& stop)
@@ -828,12 +830,17 @@ void MovementAction::RideLeave(PlayerbotAI* ai, const char* reason)
 
     Player* bot = ai->GetBot();
     AiObjectContext* context = ai->GetAiObjectContext();
-    TransportRide& ride = AI_VALUE(LastMovement&, "last movement").ride;
+    LastMovement& lastMove = AI_VALUE(LastMovement&, "last movement");
+    TransportRide& ride = lastMove.ride;
 
     if (!ride.active())
         return;
 
+    RideClockTick(ride);
+
     TransportTrace::instance().Event(bot, bot->GetTransport(), "ride", "ride_leave", reason, ride.exitDock);
+    lastMove.rideTotalMs += ride.riddenMs;
+    lastMove.lastRideEntry = ride.entry;
     ride.clear();
 }
 
@@ -853,6 +860,8 @@ bool MovementAction::RideUpdate(PlayerbotAI* ai)
 
     if (!ride.active())
         return false;
+
+    RideClockTick(ride);
 
     GenericTransport* transport = bot->GetTransport();
 

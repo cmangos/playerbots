@@ -48,7 +48,6 @@ void TestContext::Reset()
     lootStackSeen = false;
     actionSpamArmed = false;
     transportRideMs.clear();
-    transportRideTick = 0;
     transportRideCredited = 0;
     transportRideOnLastTick = false;
     transportRideLastPos = WorldPosition();

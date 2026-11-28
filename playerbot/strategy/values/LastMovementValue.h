@@ -17,6 +17,8 @@ namespace ai
         ObjectGuid guid;
         uint32 startMs = 0;
         uint32 budgetMs = 0;
+        uint32 riddenMs = 0;
+        uint32 tickMs = 0;
         WorldPosition boardStop;
         WorldPosition exitStop;
         WorldPosition exitDock;
@@ -32,6 +34,8 @@ namespace ai
             guid = ObjectGuid();
             startMs = 0;
             budgetMs = 0;
+            riddenMs = 0;
+            tickMs = 0;
             boardStop = WorldPosition();
             exitStop = WorldPosition();
             exitDock = WorldPosition();
@@ -62,6 +66,8 @@ namespace ai
             boardSpot = other.boardSpot;
             boardSpotStop = other.boardSpotStop;
             ride = other.ride;
+            rideTotalMs = other.rideTotalMs;
+            lastRideEntry = other.lastRideEntry;
             lastPath = other.lastPath;
             lastMoveShort = other.lastMoveShort;
             nextTeleport = other.nextTeleport;
@@ -81,6 +87,8 @@ namespace ai
             boardSpot = WorldPosition();
             boardSpotStop = WorldPosition();
             ride.clear();
+            rideTotalMs = 0;
+            lastRideEntry = 0;
             lastFlee = 0;
             lastMoveShort = WorldPosition();
             lastFleeTo = WorldPosition();
@@ -108,6 +116,8 @@ namespace ai
         WorldPosition boardSpot;
         WorldPosition boardSpotStop;
         TransportRide ride;
+        uint32 rideTotalMs;
+        uint32 lastRideEntry;
         time_t lastFlee;
         WorldPosition lastFleeTo;
         TravelPath lastPath;

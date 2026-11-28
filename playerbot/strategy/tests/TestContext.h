@@ -99,7 +99,7 @@ namespace ai
         bool actionSpamArmed = false;
 
         std::map<uint32, uint32> transportRideMs;
-        uint32 transportRideTick = 0;
+        uint32 transportRideCredited = 0;
         bool transportRideOnLastTick = false;
         WorldPosition transportRideLastPos;
         bool transportRideLastAtStop = false;

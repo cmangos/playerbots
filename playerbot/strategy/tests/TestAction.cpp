@@ -32,6 +32,7 @@
 #include "MonitorMovement.h"
 #include "BossFocusManager.h"
 #include "Entities/Transports.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 
 using namespace ai;
 
@@ -199,6 +200,10 @@ bool TestAction::Execute(Event& event)
         ctx.testStartTime = WorldTimer::getMSTime();
         if (bot->IsInWorld())
             ctx.testStartPosition = WorldPosition(bot);
+
+        LastMovement& startMove = AI_VALUE(LastMovement&, "last movement");
+
+        ctx.transportRideCredited = startMove.rideTotalMs + (startMove.ride.active() ? startMove.ride.riddenMs : 0);
 
         if (TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target"))
             sTravelMgr.SetNullTravelTarget(travelTarget);
@@ -378,17 +383,28 @@ void TestAction::UpdateTransportRide()
 
     GenericTransport* transport = bot->GetTransport();
     uint32 now = WorldTimer::getMSTime();
+    LastMovement& lastMove = AI_VALUE(LastMovement&, "last movement");
 
-    if (transport && ctx.transportRideOnLastTick && ctx.transportRideTick)
+    auto creditRide = [this](uint32 delta, uint32 entry)
     {
-        uint32 delta = WorldTimer::getMSTimeDiff(ctx.transportRideTick, now);
-
-        if (delta > 30000)
-            delta = 30000;
+        if (!delta)
+            return;
 
         ctx.transportRideMs[0] += delta;
-        ctx.transportRideMs[transport->GetEntry()] += delta;
+
+        if (entry)
+            ctx.transportRideMs[entry] += delta;
+    };
+
+    const uint32 rideTotal = lastMove.rideTotalMs + (lastMove.ride.active() ? lastMove.ride.riddenMs : 0);
+
+    if (rideTotal > ctx.transportRideCredited)
+    {
+        creditRide(rideTotal - ctx.transportRideCredited, lastMove.ride.active() ? lastMove.ride.entry : lastMove.lastRideEntry);
+        ctx.transportRideCredited = rideTotal;
     }
+    else if (rideTotal < ctx.transportRideCredited)
+        ctx.transportRideCredited = rideTotal;
 
     if (transport)
         ctx.transportLeaveTick = 0;
@@ -411,7 +427,6 @@ void TestAction::UpdateTransportRide()
     WorldPosition stopPosition;
 
     ctx.transportRideOnLastTick = transport != nullptr;
-    ctx.transportRideTick = now;
     ctx.transportRideLastPos = transport ? WorldPosition(bot) : WorldPosition();
     ctx.transportRideLastAtStop = transport && MovementAction::TransportAtStop(transport, stopPosition);
 }
@@ -423,6 +438,12 @@ void TestAction::SetResult(TestResult newResult, const std::string& msg)
 
     ctx.result = newResult;
     ctx.resultMessage = msg;
+
+    if (ctx.spawnRequest)
+    {
+        ctx.spawnRequest->cancelled.store(true, std::memory_order_release);
+        ctx.spawnRequest.reset();
+    }
 
     std::string resultStr;
     switch (newResult)
@@ -482,7 +503,6 @@ void TestAction::ReportResult()
         LogToConsole(logLine);
 
         if (ai->GetHolder())
-            ai->GetHolder()->DeleteBot(bot->GetObjectGuid(), false);        
             ai->GetHolder()->DeleteBotDeferred(bot->GetObjectGuid(), false);        
     }
 }

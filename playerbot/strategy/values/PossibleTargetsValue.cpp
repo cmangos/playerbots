@@ -89,6 +89,17 @@ bool PossibleTargetsValue::IsAttackable(Unit* target, Player* player)
            player->CanAttack(target);
 }
 
+bool PossibleTargetsValue::IsHiddenFrom(Unit* target, Player* player)
+{
+    const UnitVisibility visibility = target->GetVisibility();
+    const bool isHidden = visibility == VISIBILITY_GROUP_STEALTH ||
+                          visibility == VISIBILITY_GROUP_NO_DETECT ||
+                          visibility == VISIBILITY_GROUP_INVISIBILITY;
+
+    // The server keeps the bot's client object list up to date (stealth detection included)
+    return isHidden && !player->HasAtClient(target);
+}
+
 bool PossibleTargetsValue::IsValid(Unit* target, Player* player, bool ignoreLos)
 {
     // If the target is available
@@ -112,7 +123,14 @@ bool PossibleTargetsValue::IsValid(Unit* target, Player* player, bool ignoreLos)
             return false;
         }
 
-        bool isInCombatWithTarget = target->GetVictim() == player || 
+        // A stealthed or invisible target the bot can't detect is dropped, even in combat,
+        // like a real client does when the server sends it out of range
+        if (IsHiddenFrom(target, player))
+        {
+            return false;
+        }
+
+        bool isInCombatWithTarget = target->GetVictim() == player ||
                                      target->getThreatManager().getThreat(player) > 0.0f ||
                                      player->IsInCombat();
 
